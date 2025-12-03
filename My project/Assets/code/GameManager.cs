@@ -1,5 +1,6 @@
 using MySql.Data.MySqlClient;
 using System.Collections.Generic;
+using System.Data.SqlTypes;
 using UnityEngine;
 
 public class GameManager : MonoBehaviour
@@ -96,7 +97,7 @@ public class GameManager : MonoBehaviour
         {
             conn.Open();
 
-            string sql = "SELECT user_id, username, password_hash, level, gold FROM users WHERE username = @username";
+            string sql = "SELECT user_id, username, password_hash, level, gold,attack,health,defence,criticalHit FROM users WHERE username = @username";
 
             using (var cmd = new MySqlCommand(sql, conn))
             {
@@ -117,6 +118,10 @@ public class GameManager : MonoBehaviour
                     string dbUsername = reader.GetString("username");
                     int level = reader.GetInt32("level");
                     int gold = reader.GetInt32("gold");
+                    int attack = reader.GetInt32("attack");
+                    int health = reader.GetInt32("health");
+                    int defence = reader.GetInt32("defence");
+                    int criticalHit = reader.GetInt32("criticalHit");
 
                     // 重要：先关闭第一个DataReader
                     reader.Close();
@@ -143,8 +148,13 @@ public class GameManager : MonoBehaviour
                         userId = userId,
                         username = dbUsername,
                         level = level,
-                        gold = gold
+                        gold = gold,
+                        attack = attack,
+                        health = health,
+                        defence = defence,
+                        criticalHit = criticalHit
                     };
+
 
                     OnLoginSuccess?.Invoke();
                     return true;
@@ -167,7 +177,11 @@ public class UserData
     public int userId;        // 用户ID
     public string username;   // 用户名
     public int level;         // 等级
-    public int gold;          // 金币数量
+    public int gold;   // 金币数量
+    public int health;
+    public int defence;
+    public int criticalHit;
+    public int attack;
 }
 
 // 物品数据类，用于存储物品信息
