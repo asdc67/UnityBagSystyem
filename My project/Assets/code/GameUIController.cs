@@ -27,17 +27,11 @@ public class GameUIController : MonoBehaviour
     // 游戏主面板相关UI元素
     [Header("游戏面板")]
     public GameObject gamePanel;            // 游戏主面板
-    public TMP_Text welcomeText;            // 欢迎文本
-    public TMP_Text playerInfoText;         // 玩家信息文本
+
     public Button logoutBtn;                // 退出登录按钮
     public Button backpackBtn;              // 打开背包按钮
 
-    // 背包面板相关UI元素
-    [Header("背包面板")]
-    public GameObject backpackPanel;        // 背包面板
-  //  public Transform itemGrid;              // 物品网格容器
-   // public GameObject itemSlotPrefab;       // 物品槽位预制体
-  //  public Button closeBackpackBtn;         // 关闭背包按钮
+  
 
     // Start方法在游戏开始时调用
     private void Start()
@@ -48,7 +42,7 @@ public class GameUIController : MonoBehaviour
         gotoRegisterBtn.onClick.AddListener(() => ShowPanel(false));  // 跳转注册按钮绑定显示面板方法
         gotoLoginBtn.onClick.AddListener(() => ShowPanel(true));      // 跳转登录按钮绑定显示面板方法
         logoutBtn.onClick.AddListener(OnLogout);            // 退出登录按钮绑定退出方法
-        backpackBtn.onClick.AddListener(ShowBackpack);      // 背包按钮绑定显示背包方法
+     
         //closeBackpackBtn.onClick.AddListener(HideBackpack); // 关闭背包按钮绑定隐藏背包方法
 
         // 订阅游戏管理器的事件
@@ -59,7 +53,7 @@ public class GameUIController : MonoBehaviour
         // 设置初始UI状态
         ShowPanel(true);           // 显示登录面板
         gamePanel.SetActive(false); // 隐藏游戏面板
-        backpackPanel.SetActive(false); // 隐藏背包面板
+   
     }
 
     // 当对象被销毁时调用
@@ -185,23 +179,13 @@ public class GameUIController : MonoBehaviour
 
         // 获取当前用户数据并更新UI
         var user = GameManager.CurrentUser;
-        welcomeText.text = $"欢迎, {user.username}!";  // 设置欢迎文本
-        playerInfoText.text = $"等级: {user.level} 金币: {user.gold}";  // 设置玩家信息文本
+       
     }
 
     // 显示背包的方法
-    private void ShowBackpack()
-    {
-        backpackPanel.SetActive(true);  // 显示背包面板
-        // 这里可以添加加载背包物品的逻辑
-    }
-
+   
     // 隐藏背包的方法
-    private void HideBackpack()
-    {
-        backpackPanel.SetActive(false);  // 隐藏背包面板
-    }
-
+  
     // 退出登录按钮点击处理方法
     private void OnLogout()
     {
@@ -212,7 +196,7 @@ public class GameUIController : MonoBehaviour
     private void OnLogoutSuccess()
     {
         gamePanel.SetActive(false);     // 隐藏游戏面板
-        backpackPanel.SetActive(false); // 隐藏背包面板
+    
         loginPanel.SetActive(true);     // 显示登录面板
         // 清空输入框
         loginUser.text = "";

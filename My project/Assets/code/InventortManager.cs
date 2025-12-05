@@ -2,9 +2,19 @@ using MySql.Data.MySqlClient;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
+using static UnityEditor.Progress;
 
 public class InventortManager : MonoBehaviour
 {
+
+    public Image icon;
+    public Text name;
+    public static int currentItemID;
+    public Text description;
+    int id;
+    public GameObject ItemPrefab;
+    public Transform bag;
     // 单例实例
     public static InventortManager Instance;
 
@@ -16,6 +26,9 @@ public class InventortManager : MonoBehaviour
         {
             Instance = this;
         }
+        id=GameManager.CurrentUser.userId;
+        InitUI();
+        RefreshUI();
     }
 
     // 获取玩家背包物品列表的方法
@@ -32,7 +45,7 @@ public class InventortManager : MonoBehaviour
             // SQL查询语句：联表查询背包物品和物品模板信息
             string sql = @"
                 SELECT ui.inventory_id, ui.item_id, ui.quantity, ui.slot_index,
-                       i.item_name, i.item_type
+                       i.item_name, i.item_type,ui.level
                 FROM user_inventory ui
                 JOIN items i ON ui.item_id = i.item_id
                 WHERE ui.user_id = @userId
@@ -57,7 +70,8 @@ public class InventortManager : MonoBehaviour
                             itemName = reader.GetString("item_name"),       // 物品名称
                             itemType = reader.GetString("item_type"),       // 物品类型
                             quantity = reader.GetInt32("quantity"),         // 物品数量
-                            slotIndex = reader.GetInt32("slot_index")       // 槽位索引
+                            slotIndex = reader.GetInt32("slot_index") ,    // 槽位索引
+                            level=reader.GetInt32("level")
                         };
                         // 将物品添加到列表中
                         inventory.Add(item);
@@ -123,6 +137,79 @@ public class InventortManager : MonoBehaviour
             }
 
             return true;  // 添加成功
+        }
+    }
+    public void RemoveItemFromPlayer(int userId, int itemId)
+    {
+        using (var conn = DataBaseManager.Instance.GetConnection())
+        {
+            conn.Open();
+            string removeItem = "UPDATE user_inventory SET quantity = quantity -1  WHERE user_id = @userId AND item_id = @itemId ";
+            using (var removeCmd = new MySqlCommand(removeItem, conn))
+            {
+                removeCmd.Parameters.AddWithValue("@userId", userId);
+                removeCmd.Parameters.AddWithValue("@itemId", itemId);
+                removeCmd.ExecuteNonQuery();
+            }
+
+        }
+    }
+    private void Update()
+    {
+        DescriptionControl();
+    }
+
+    private void RefreshUI()
+    {
+        foreach (Transform child in bag)
+        {
+            Destroy(child.gameObject);
+        }
+        List<InventoryItem> inventoryItems = new List<InventoryItem>();
+        inventoryItems = GetPlayerInventory(id);
+        foreach (InventoryItem inventoryItem in inventoryItems)
+        {
+            GameObject item = Instantiate(ItemPrefab, bag);
+            item.name = $"{inventoryItem.itemId}";
+            ClickItem clickItem=item.GetComponent<ClickItem>();
+            clickItem.SetIcon(inventoryItem.itemId, inventoryItem.itemType, inventoryItem.level, inventoryItem.quantity);
+         
+        }
+    }
+    void InitUI()
+    {
+        List<InventoryItem> inventoryItems = new List<InventoryItem>();
+        inventoryItems = GetPlayerInventory(id);
+        currentItemID = inventoryItems[0].itemId;
+    }
+    void DescriptionControl()
+    {
+        List<InventoryItem> inventoryItems = new List<InventoryItem>();
+        inventoryItems = GetPlayerInventory(id);
+       
+          using (var conn = DataBaseManager.Instance.GetConnection())
+        {
+            conn.Open();
+            string cmd = "select item_name,description,item_type from items where item_id=@id";
+            using(var Cmd=new MySqlCommand(cmd, conn))
+            {
+                Cmd.Parameters.AddWithValue("@id",currentItemID);
+                using (var reader = Cmd.ExecuteReader())
+                {
+                    if (reader.Read())
+                    {
+                        name.text = reader.GetString("item_name");
+                        description.text = reader.GetString("description");
+                        icon.sprite = Resources.Load<Sprite>($"Sprites/{currentItemID}");
+                        string type=reader.GetString("item_type");   
+                        if(type=="weapon")
+                        icon.transform.rotation = Quaternion.Euler(0, 0, -45);
+                        else
+                            icon.transform.rotation = Quaternion.Euler(0, 0, 0);
+
+                    }
+                }
+            }
         }
     }
 }

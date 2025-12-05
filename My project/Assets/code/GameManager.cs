@@ -208,6 +208,7 @@ public class InventoryItem
     public string itemType;   // 物品类型
     public int quantity;      // 物品数量
     public int slotIndex;     // 背包槽位索引
+    public int level;
 }
 
 
