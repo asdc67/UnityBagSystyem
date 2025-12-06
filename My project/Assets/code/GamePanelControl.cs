@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class GamePanelControl : MonoBehaviour
 {
+    public GameObject shopPanel;
     public GameObject gamePanel;
     public GameObject backpackPanel;
     // Start is called before the first frame update
@@ -21,5 +22,15 @@ public class GamePanelControl : MonoBehaviour
     {
         backpackPanel.SetActive(true);
         gamePanel.SetActive(false);
+    }
+    public void TurnToShop()
+    {
+        shopPanel.SetActive(true);
+        gamePanel.SetActive(false);
+    }
+    public void BagReturnToGamePanel()
+    {
+        gamePanel.SetActive(true);
+        backpackPanel.SetActive(false );
     }
 }

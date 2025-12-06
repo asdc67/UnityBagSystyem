@@ -205,14 +205,23 @@ public class InventortManager : MonoBehaviour
                 {
                     if (reader.Read())
                     {
+
                         name.text = reader.GetString("item_name");
-                        description.text = reader.GetString("description");
+                        string ds = reader.GetString("description");
+                        description.text = $"{ds}";
                         icon.sprite = Resources.Load<Sprite>($"Sprites/{currentItemID}");
                         string type = reader.GetString("item_type");
                         if (type == "weapon")
+                        {
                             icon.transform.rotation = Quaternion.Euler(0, 0, -45);
+                            icon.rectTransform.localScale = new Vector3(1,1,1);
+                        }
                         else
+                        {
                             icon.transform.rotation = Quaternion.Euler(0, 0, 0);
+                            icon.rectTransform.localScale = new Vector3(1.5f, 1, 1);
+
+                        }
 
                     }
                 }
