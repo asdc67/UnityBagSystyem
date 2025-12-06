@@ -26,8 +26,15 @@ public class InventortManager : MonoBehaviour
         {
             Instance = this;
         }
-        id=GameManager.CurrentUser.userId;
+        id = GameManager.CurrentUser.userId;
         InitUI();
+        RefreshUI();
+    }
+
+    // 添加缺失的方法：LoadPlayerItems
+    public void LoadPlayerItems()
+    {
+        // 刷新背包UI
         RefreshUI();
     }
 
@@ -70,8 +77,8 @@ public class InventortManager : MonoBehaviour
                             itemName = reader.GetString("item_name"),       // 物品名称
                             itemType = reader.GetString("item_type"),       // 物品类型
                             quantity = reader.GetInt32("quantity"),         // 物品数量
-                            slotIndex = reader.GetInt32("slot_index") ,    // 槽位索引
-                            level=reader.GetInt32("level")
+                            slotIndex = reader.GetInt32("slot_index"),    // 槽位索引
+                            level = reader.GetInt32("level")
                         };
                         // 将物品添加到列表中
                         inventory.Add(item);
@@ -171,9 +178,9 @@ public class InventortManager : MonoBehaviour
         {
             GameObject item = Instantiate(ItemPrefab, bag);
             item.name = $"{inventoryItem.itemId}";
-            ClickItem clickItem=item.GetComponent<ClickItem>();
+            ClickItem clickItem = item.GetComponent<ClickItem>();
             clickItem.SetIcon(inventoryItem.itemId, inventoryItem.itemType, inventoryItem.level, inventoryItem.quantity);
-         
+
         }
     }
     void InitUI()
@@ -186,14 +193,14 @@ public class InventortManager : MonoBehaviour
     {
         List<InventoryItem> inventoryItems = new List<InventoryItem>();
         inventoryItems = GetPlayerInventory(id);
-       
-          using (var conn = DataBaseManager.Instance.GetConnection())
+
+        using (var conn = DataBaseManager.Instance.GetConnection())
         {
             conn.Open();
             string cmd = "select item_name,description,item_type from items where item_id=@id";
-            using(var Cmd=new MySqlCommand(cmd, conn))
+            using (var Cmd = new MySqlCommand(cmd, conn))
             {
-                Cmd.Parameters.AddWithValue("@id",currentItemID);
+                Cmd.Parameters.AddWithValue("@id", currentItemID);
                 using (var reader = Cmd.ExecuteReader())
                 {
                     if (reader.Read())
@@ -201,9 +208,9 @@ public class InventortManager : MonoBehaviour
                         name.text = reader.GetString("item_name");
                         description.text = reader.GetString("description");
                         icon.sprite = Resources.Load<Sprite>($"Sprites/{currentItemID}");
-                        string type=reader.GetString("item_type");   
-                        if(type=="weapon")
-                        icon.transform.rotation = Quaternion.Euler(0, 0, -45);
+                        string type = reader.GetString("item_type");
+                        if (type == "weapon")
+                            icon.transform.rotation = Quaternion.Euler(0, 0, -45);
                         else
                             icon.transform.rotation = Quaternion.Euler(0, 0, 0);
 
