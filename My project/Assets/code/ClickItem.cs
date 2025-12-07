@@ -1,3 +1,4 @@
+using MySql.Data.MySqlClient;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -14,22 +15,38 @@ public class ClickItem : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        
+
     }
 
     // Update is called once per frame
     void Update()
     {
-        
+
     }
     public void OnClick()
     {
-        InventortManager.currentItemID = Convert.ToInt32(gameObject.name);
-        Debug.Log($"{InventortManager.currentItemID}");
+        InventortManager.currentInventoryId = Convert.ToInt32(gameObject.name);
+        Debug.Log($"{InventortManager.currentInventoryId}");
         image.SetActive(true);
         Invoke("Dselect", 1f);
+        using (var conn = DataBaseManager.Instance.GetConnection())
+        {
+            conn.Open();
+            string cmd = "select item_id from user_inventory where inventory_id=@id";
+            using (var Cmd = new MySqlCommand(cmd, conn))
+            {
+                Cmd.Parameters.AddWithValue("@id", InventortManager.currentInventoryId);
+                using (var reader = Cmd.ExecuteReader())                           
+                {
+                    if (reader.Read())
+                    {
+                        InventortManager.currentItemID = reader.GetInt32("item_id");
+                    }
+                }
+            }
+        }
     }
-    public void SetIcon(int id,string type,int level,int quantity)
+    public void SetIcon(int id, string type, int level, int quantity)
     {
         icon.sprite = Resources.Load<Sprite>($"Sprites/{id}");
         if (type == "weapon")
@@ -43,8 +60,9 @@ public class ClickItem : MonoBehaviour
             icon.transform.rotation = Quaternion.Euler(0, 0, 0);
         }
     }
-  void Dselect()
+    void Dselect()
     {
-        image.SetActive(false); 
+        image.SetActive(false);
     }
+   
 }

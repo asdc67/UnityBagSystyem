@@ -11,6 +11,7 @@ public class InventortManager : MonoBehaviour
     public Image icon;
     public Text name;
     public static int currentItemID;
+    public static int currentInventoryId;
     public Text description;
     int id;
     public GameObject ItemPrefab;
@@ -146,16 +147,15 @@ public class InventortManager : MonoBehaviour
             return true;  // Ìí¼Ó³É¹¦
         }
     }
-    public void RemoveItemFromPlayer(int userId, int itemId)
+    public void RemoveItemFromPlayer(int inventory_id)
     {
         using (var conn = DataBaseManager.Instance.GetConnection())
         {
             conn.Open();
-            string removeItem = "UPDATE user_inventory SET quantity = quantity -1  WHERE user_id = @userId AND item_id = @itemId ";
+            string removeItem = "UPDATE user_inventory SET quantity = quantity -1  WHERE  inventory_id = @inventoryId ";
             using (var removeCmd = new MySqlCommand(removeItem, conn))
             {
-                removeCmd.Parameters.AddWithValue("@userId", userId);
-                removeCmd.Parameters.AddWithValue("@itemId", itemId);
+                removeCmd.Parameters.AddWithValue("@inventoryId", inventory_id);
                 removeCmd.ExecuteNonQuery();
             }
 
@@ -177,7 +177,7 @@ public class InventortManager : MonoBehaviour
         foreach (InventoryItem inventoryItem in inventoryItems)
         {
             GameObject item = Instantiate(ItemPrefab, bag);
-            item.name = $"{inventoryItem.itemId}";
+            item.name = $"{inventoryItem.inventoryId}";
             ClickItem clickItem = item.GetComponent<ClickItem>();
             clickItem.SetIcon(inventoryItem.itemId, inventoryItem.itemType, inventoryItem.level, inventoryItem.quantity);
 
@@ -188,6 +188,7 @@ public class InventortManager : MonoBehaviour
         List<InventoryItem> inventoryItems = new List<InventoryItem>();
         inventoryItems = GetPlayerInventory(id);
         currentItemID = inventoryItems[0].itemId;
+         currentInventoryId= inventoryItems[0].inventoryId;
     }
     void DescriptionControl()
     {
@@ -214,7 +215,7 @@ public class InventortManager : MonoBehaviour
                         if (type == "weapon")
                         {
                             icon.transform.rotation = Quaternion.Euler(0, 0, -45);
-                            icon.rectTransform.localScale = new Vector3(1,1,1);
+                            icon.rectTransform.localScale = new Vector3(1, 1, 1);
                         }
                         else
                         {
@@ -228,4 +229,5 @@ public class InventortManager : MonoBehaviour
             }
         }
     }
+    
 }
