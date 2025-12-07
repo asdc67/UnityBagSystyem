@@ -1,4 +1,4 @@
-using MySql.Data.MySqlClient;
+using MySqlConnector;
 using UnityEngine;
 
 public class SellButton : MonoBehaviour

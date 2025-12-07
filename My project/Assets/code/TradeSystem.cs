@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
-using MySql.Data.MySqlClient;
+using MySqlConnector;
 
 public class TradeSystemManager : MonoBehaviour
 {

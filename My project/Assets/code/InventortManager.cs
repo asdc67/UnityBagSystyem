@@ -1,4 +1,4 @@
-using MySql.Data.MySqlClient;
+using MySqlConnector;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -146,20 +146,47 @@ public class InventortManager : MonoBehaviour
 
             return true;  // Ìí¼Ó³É¹¦
         }
+        RefreshUI();
     }
     public void RemoveItemFromPlayer(int inventory_id)
     {
+        int count=1;
         using (var conn = DataBaseManager.Instance.GetConnection())
         {
             conn.Open();
-            string removeItem = "UPDATE user_inventory SET quantity = quantity -1  WHERE  inventory_id = @inventoryId ";
-            using (var removeCmd = new MySqlCommand(removeItem, conn))
+            string selectitem = "select quantity from user_inventory where inventory_id=@id ";
+            using (var selectCmd = new MySqlCommand(selectitem, conn))
             {
-                removeCmd.Parameters.AddWithValue("@inventoryId", inventory_id);
-                removeCmd.ExecuteNonQuery();
-            }
+                selectCmd.Parameters.AddWithValue("@id",inventory_id);
+                using (var reader = selectCmd.ExecuteReader())
+                {
 
+                    if (reader.Read())
+                    {
+                        count = reader.GetInt32("quantity");
+                    }
+                }
+            }
+            if (count > 1)
+            {
+                string removeItem = "UPDATE user_inventory SET quantity = quantity -1  WHERE  inventory_id = @inventoryId ";
+                using (var removeCmd = new MySqlCommand(removeItem, conn))
+                {
+                    removeCmd.Parameters.AddWithValue("@inventoryId", inventory_id);
+                    removeCmd.ExecuteNonQuery();
+                }
+            }
+            else
+            {
+                string deleteItem = "delete from user_inventory where inventory_id=@id";
+                using(var deleteCmd = new MySqlCommand(deleteItem, conn))
+                {
+                    deleteCmd.Parameters.AddWithValue("@id", inventory_id);
+                    deleteCmd.ExecuteNonQuery();
+                }
+            }
         }
+        RefreshUI();
     }
     private void Update()
     {
